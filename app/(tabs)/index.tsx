@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
+import { View,  StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Text } from "~/components/ui/text"
 
 export default function ExploreScreen() {
   const featuredDestinations = [

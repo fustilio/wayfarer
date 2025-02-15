@@ -1,18 +1,15 @@
-import { useState, useEffect } from 'react';
-import {  View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { Button, View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { recognize } from 'react-native-tesseract-ocr';
 import { Card, CardContent } from '~/components/ui/card';
-import { Button } from '~/components/ui/button';
 
 export default function CaptureScreen() {
-  const [hasPermission, setHasPermission] = useState(null);
+  const cameraRef = useRef(null); 
   const [camera, setCamera] = useState(null);
-  const [recognizedText, setRecognizedText] = useState('');
-  const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   if (!permission) {
@@ -40,9 +37,10 @@ export default function CaptureScreen() {
 
 
   const takePicture = async () => {
-    if (camera) {
-      const data = await camera.takePictureAsync(null);
-      console.log("picture", data.uri);
+    console.log(cameraRef.current)
+    if (cameraRef.current) {
+      const data = await cameraRef.current.takePictureAsync(null);
+      console.log('picture', data.uri);
       setCapturedImageUri(data.uri);
 
       try {
@@ -70,7 +68,7 @@ export default function CaptureScreen() {
           Take photos of museum panels, landmarks, or anything interesting
         </Text>
       </View>
-      <CameraView style={styles.camera} facing={facing}>
+      <CameraView style={styles.camera} ref={cameraRef} facing={facing}>
         <View style={styles.buttonContainer}>
           <Pressable  onPress={toggleCameraFacing}>
             <Text >Flip Camera</Text>
@@ -78,10 +76,10 @@ export default function CaptureScreen() {
         </View>
       </CameraView>
 
-      <Button className="gap-2" style={styles.captureButton} onPress={takePicture}>
-        <Ionicons name="camera" size={24} color="#FFFFFF" />
-        <Text className="text-white">Take Photo</Text>
-      </Button>
+      <Pressable style={styles.captureButton} onPress={takePicture}>
+        <Ionicons name="camera" size={32} color="#FFFFFF" />
+        <Text style={styles.captureText}>Take Photos</Text>
+      </Pressable>
 
       <View style={styles.featuresContainer}>
         <Card style={styles.featureItem}>

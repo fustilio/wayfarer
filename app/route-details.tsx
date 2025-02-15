@@ -1,25 +1,36 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TextInput, Pressable, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useState } from "react";
+import {
+  StyleSheet,
+  Image,
+  ScrollView,
+  Alert,
+  View,
+} from "react-native";
+import { useLocalSearchParams } from "expo-router";
+
+import { Text } from "~/components/ui/text";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 
 export default function RouteDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const [newPoi, setNewPoi] = useState('');
+  const [newPoi, setNewPoi] = useState("");
   const [editingPoiId, setEditingPoiId] = useState<string | null>(null);
-  const [editedPoiText, setEditedPoiText] = useState('');
+  const [editedPoiText, setEditedPoiText] = useState("");
 
   // Mock curatedRoutes data (replace with actual data fetching)
   const [curatedRoutes, setCuratedRoutes] = useState([
     {
-      id: '1',
-      title: 'Historical Kyoto',
+      id: "1",
+      title: "Historical Kyoto",
       description: "Explore Kyoto's most iconic temples and shrines.",
-      duration: 'Full-day',
-      image: 'https://images.unsplash.com/photo-1557330311-99d2c80536ca',
+      duration: "Full-day",
+      image: "https://images.unsplash.com/photo-1557330311-99d2c80536ca",
       pois: [
-        'Kinkaku-ji (Golden Pavilion)',
-        'Fushimi Inari Shrine',
-        'Kiyomizu-dera Temple',
+        "Kinkaku-ji (Golden Pavilion)",
+        "Fushimi Inari Shrine",
+        "Kiyomizu-dera Temple",
       ],
       coordinates: [
         { latitude: 34.9916, longitude: 135.7481 }, // Example coordinates for Kinkaku-ji
@@ -28,15 +39,15 @@ export default function RouteDetailsScreen() {
       ],
     },
     {
-      id: '2',
+      id: "2",
       title: "Barcelona's Modernist Architecture",
-      description: 'Discover the architectural wonders of Antoni Gaudí.',
-      duration: 'Full-day',
-      image: 'https://images.unsplash.com/photo-1560184845-78c0849ada71',
+      description: "Discover the architectural wonders of Antoni Gaudí.",
+      duration: "Full-day",
+      image: "https://images.unsplash.com/photo-1560184845-78c0849ada71",
       pois: [
-        'Sagrada Familia',
-        'Park Güell',
-        'Casa Batlló',
+        "Sagrada Familia",
+        "Park Güell",
+        "Casa Batlló",
       ],
       coordinates: [
         { latitude: 41.4036, longitude: 2.1744 }, // Example coordinates for Sagrada Familia
@@ -60,10 +71,10 @@ export default function RouteDetailsScreen() {
   const handleAddPoi = () => {
     if (newPoi) {
       const updatedRoutes = curatedRoutes.map((r) =>
-        r.id === id ? { ...r, pois: [...r.pois, newPoi] } : r
+        r.id === id ? { ...r, pois: [...r.pois, newPoi] } : r,
       );
       setCuratedRoutes(updatedRoutes);
-      setNewPoi('');
+      setNewPoi("");
     }
   };
 
@@ -79,29 +90,29 @@ export default function RouteDetailsScreen() {
             ...r,
             pois: r.pois.map((poi, i) => (i === index ? editedPoiText : poi)),
           }
-        : r
+        : r,
     );
     setCuratedRoutes(updatedRoutes);
     setEditingPoiId(null);
-    setEditedPoiText('');
+    setEditedPoiText("");
   };
 
   const handleDeletePoi = (index: number) => {
     Alert.alert(
-      'Delete POI',
-      'Are you sure you want to delete this point of interest?',
+      "Delete POI",
+      "Are you sure you want to delete this point of interest?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'OK',
+          text: "OK",
           onPress: () => {
             const updatedRoutes = curatedRoutes.map((r) =>
-              r.id === id ? { ...r, pois: r.pois.filter((_, i) => i !== index) } : r
+              r.id === id ? { ...r, pois: r.pois.filter((_, i) => i !== index) } : r,
             );
             setCuratedRoutes(updatedRoutes);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -109,56 +120,56 @@ export default function RouteDetailsScreen() {
     <ScrollView style={styles.container}>
       <Image source={{ uri: route.image }} style={styles.routeImage} />
       <View style={styles.routeInfo}>
-        <Text style={styles.routeTitle}>{route.title}</Text>
-        <Text style={styles.routeDescription}>{route.description}</Text>
-        <Text style={styles.routeDuration}>Duration: {route.duration}</Text>
-        <Text style={styles.routePoisTitle}>Points of Interest:</Text>
+        <Text className="text-2xl font-bold" style={styles.routeTitle}>{route.title}</Text>
+        <Text className="text-muted-foreground" style={styles.routeDescription}>{route.description}</Text>
+        <Text className="text-muted-foreground" style={styles.routeDuration}>Duration: {route.duration}</Text>
+        <Text className="text-xl font-bold" style={styles.routePoisTitle}>Points of Interest:</Text>
 
         {route.pois.map((poi, index) => (
-          <View key={index} style={styles.poiItem}>
+          <Card key={index} style={styles.poiItem}>
             {editingPoiId === String(index) ? (
-              <TextInput
+              <Input
                 style={styles.editPoiInput}
                 value={editedPoiText}
                 onChangeText={setEditedPoiText}
                 onBlur={() => handleSavePoi(index)}
               />
             ) : (
-              <Text style={styles.routePoi}>- {poi}</Text>
+              <Text className="text-muted-foreground" style={styles.routePoi}>- {poi}</Text>
             )}
 
             {editingPoiId === String(index) ? (
               <View style={styles.editButtons}>
-                <Pressable onPress={() => handleSavePoi(index)} style={styles.saveButton}>
-                  <Text style={styles.buttonText}>Save</Text>
-                </Pressable>
-                <Pressable onPress={() => setEditingPoiId(null)} style={styles.cancelButton}>
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </Pressable>
+                <Button onPress={() => handleSavePoi(index)} style={styles.saveButton}>
+                  Save
+                </Button>
+                <Button onPress={() => setEditingPoiId(null)} style={styles.cancelButton}>
+                  Cancel
+                </Button>
               </View>
             ) : (
               <View style={styles.editButtons}>
-                <Pressable onPress={() => handleEditPoi(String(index), poi)} style={styles.editButton}>
-                  <Text style={styles.buttonText}>Edit</Text>
-                </Pressable>
-                <Pressable onPress={() => handleDeletePoi(index)} style={styles.deleteButton}>
-                  <Text style={styles.buttonText}>Delete</Text>
-                </Pressable>
+                <Button onPress={() => handleEditPoi(String(index), poi)} style={styles.editButton}>
+                  Edit
+                </Button>
+                <Button onPress={() => handleDeletePoi(index)} style={styles.deleteButton}>
+                  Delete
+                </Button>
               </View>
             )}
-          </View>
+          </Card>
         ))}
 
         <View style={styles.addPoiContainer}>
-          <TextInput
+          <Input
             style={styles.addPoiInput}
             placeholder="Add a new point of interest"
             value={newPoi}
             onChangeText={setNewPoi}
           />
-          <Pressable onPress={handleAddPoi} style={styles.addPoiButton}>
-            <Text style={styles.buttonText}>Add POI</Text>
-          </Pressable>
+          <Button onPress={handleAddPoi} style={styles.addPoiButton}>
+            Add POI
+          </Button>
         </View>
       </View>
     </ScrollView>
@@ -168,10 +179,10 @@ export default function RouteDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   routeImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
     marginBottom: 10,
   },
@@ -180,86 +191,86 @@ const styles = StyleSheet.create({
   },
   routeTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   routeDescription: {
     fontSize: 16,
-    color: 'gray',
+    color: "gray",
     marginBottom: 10,
   },
   routeDuration: {
     fontSize: 14,
-    color: 'gray',
+    color: "gray",
     marginBottom: 10,
   },
   routePoisTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
     marginBottom: 5,
   },
   poiItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 5,
   },
   routePoi: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   editButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   editButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
     padding: 5,
     borderRadius: 5,
     marginLeft: 5,
   },
   deleteButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: "#e74c3c",
     padding: 5,
     borderRadius: 5,
     marginLeft: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
   },
   addPoiContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
   },
   addPoiInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 5,
     marginRight: 10,
   },
   addPoiButton: {
-    backgroundColor: '#27ae60',
+    backgroundColor: "#27ae60",
     padding: 10,
     borderRadius: 5,
   },
   editPoiInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 5,
     marginRight: 5,
   },
   saveButton: {
-    backgroundColor: '#27ae60',
+    backgroundColor: "#27ae60",
     padding: 5,
     borderRadius: 5,
     marginLeft: 5,
   },
   cancelButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: "#e74c3c",
     padding: 5,
     borderRadius: 5,
     marginLeft: 5,

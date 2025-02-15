@@ -9,9 +9,10 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
+import { supabase } from '~/lib/supabase';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -32,10 +33,26 @@ export default function RootLayout() {
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
+  async function signInAnonymously() {
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        Alert.alert(error.message);
+      }
+      if (data) {
+        console.log(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useIsomorphicLayoutEffect(() => {
     if (hasMounted.current) {
       return;
     }
+
+    signInAnonymously();
 
     if (Platform.OS === 'web') {
       // Adds the background color to the html element to prevent white background on overscroll.

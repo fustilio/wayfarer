@@ -1,32 +1,37 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { Button, View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 
-import { Camera, CameraType } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { recognize } from 'react-native-tesseract-ocr';
-import MyTravelNotes from './my-travel-notes';
 
 export default function CaptureScreen() {
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(CameraType.back);
   const [camera, setCamera] = useState(null);
   const [recognizedText, setRecognizedText] = useState('');
   const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  if (hasPermission === null) {
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
+  if (!permission) {
+    // Camera permissions are still loading.
     return <View />;
   }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
+
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
 
   const takePicture = async () => {
     if (camera) {
@@ -54,21 +59,13 @@ export default function CaptureScreen() {
           Take photos of museum panels, landmarks, or anything interesting
         </Text>
       </View>
-
-      <Camera
-        style={styles.camera}
-        type={type}
-        ref={(ref) => {
-          setCamera(ref);
-        }}>
+      <CameraView style={styles.camera} facing={facing}>
         <View style={styles.buttonContainer}>
-          <Pressable style={styles.flipButton} onPress={() => {
-              setType(type === CameraType.back ? CameraType.front : CameraType.back);
-            }}>
-            <Ionicons name="camera-reverse" size={32} color="white" />
+          <Pressable style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Flip Camera</Text>
           </Pressable>
         </View>
-      </Camera>
+      </CameraView>
 
       <Pressable style={styles.captureButton} onPress={takePicture}>
         <Ionicons name="camera" size={32} color="#FFFFFF" />
@@ -107,6 +104,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
     padding: 20,
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
   },
   camera: {
     flex: 1,

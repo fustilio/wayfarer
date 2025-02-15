@@ -11,26 +11,70 @@ import { ThemeToggle } from '~/components/shared/theme-toggle';
 import { Text } from '~/components/ui/text';
 import { Avatar, AvatarImage, AvatarFallback } from '~/components/ui/avatar';
 import { supabase } from '~/lib/supabase';
-import { useState, useEffect } from 'react';
-import { Session } from '@supabase/supabase-js';
+import { useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
+import { useSession } from '~/lib/auth';
+
 
 export default function ProfileScreen() {
-  const [session, setSession] = useState<Session | null>(null);
+  const {session} = useSession();
 
-  useEffect(() => {
-    supabase.auth.getSession().then((res) => {
-      if (res.error) {
-        console.log(res.error.message);
-        return;
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+
+  const router = useRouter();
+
+  
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!image || !session?.user) {
+      Alert.alert('No image selected or not signed in');
+      return;
+    }
+
+    try {
+      const imageUri = image.uri;
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const decodedFile = decode(base64);
+      const filename = `${Date.now()}.png`;
+
+      const { data, error } = await supabase.storage
+        .from('pictures')
+        .upload(`${session.user.id}/${filename}`, decodedFile, {
+          contentType: 'image/png',
+          upsert: false,
+        });
+
+      if (error) {
+        Alert.alert(error.message);
+      } else {
+        Alert.alert('Image uploaded successfully!');
+        console.log(data);
       }
-
-      setSession(res.data.session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error uploading image');
+    }
+  };
 
   const pastTrips = [
     {
@@ -160,6 +204,36 @@ export default function ProfileScreen() {
           </Pressable>
         </>
       )}
+      <Pressable
+        onPress={pickImage}
+        className="flex-row items-center px-4 py-3 border-b border-border"
+      >
+        <Ionicons name="image-outline" size={24} color="#111827" />
+        <Text className="flex-1 ml-3 text-foreground">Select Image</Text>
+        <Ionicons name="chevron-forward" size={24} color="#6B7280" />
+      </Pressable>
+      <Pressable
+        onPress={uploadImage}
+        className="flex-row items-center px-4 py-3 border-b border-border"
+      >
+        <Ionicons name="cloud-upload-outline" size={24} color="#111827" />
+        <Text className="flex-1 ml-3 text-foreground">Upload Image</Text>
+        <Ionicons name="chevron-forward" size={24} color="#6B7280" />
+      </Pressable>
+      {image && (
+        <Image
+          source={{ uri: image.uri }}
+          style={{ width: 200, height: 200 }}
+        />
+      )}
+      <Pressable
+        onPress={() => router.push('/(tabs)/profile/image-manager')}
+        className="flex-row items-center px-4 py-3 border-b border-border"
+      >
+        <Ionicons name="images-outline" size={24} color="#111827" />
+        <Text className="flex-1 ml-3 text-foreground">Manage Images</Text>
+        <Ionicons name="chevron-forward" size={24} color="#6B7280" />
+      </Pressable>
     </ScrollView>
   );
 }

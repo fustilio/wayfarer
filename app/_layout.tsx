@@ -13,6 +13,7 @@ import { Platform, Alert } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { supabase } from '~/lib/supabase';
+import { useSession } from '~/lib/auth';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -32,20 +33,7 @@ export default function RootLayout() {
   const hasMounted = React.useRef(false);
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-
-  async function signInAnonymously() {
-    try {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        Alert.alert(error.message);
-      }
-      if (data) {
-        console.log(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+const { signInAnonymously } = useSession();
 
   useIsomorphicLayoutEffect(() => {
     if (hasMounted.current) {

@@ -2,18 +2,24 @@ import { View, Text, StyleSheet, Image, ScrollView, Pressable } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
-  const trips = [
+  const pastTrips = [
     {
       id: '1',
       destination: 'Kyoto',
-      dates: 'Mar 15-22, 2024',
+      dates: 'Mar 15-22, 2023',
       image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e',
     },
     {
       id: '2',
       destination: 'Barcelona',
-      dates: 'May 1-8, 2024',
+      dates: 'May 1-8, 2023',
       image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded',
+    },
+    {
+      id: '3',
+      destination: 'Rome',
+      dates: 'Oct 20-27, 2022',
+      image: 'https://images.unsplash.com/photo-1516427872446-839984941431',
     },
   ];
 
@@ -43,8 +49,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Trips</Text>
-        {trips.map((trip) => (
+        <Text style={styles.sectionTitle}>Past Trips</Text>
+        {pastTrips.map((trip) => (
           <Pressable key={trip.id} style={styles.tripCard}>
             <Image source={{ uri: trip.image }} style={styles.tripImage} />
             <View style={styles.tripInfo}>

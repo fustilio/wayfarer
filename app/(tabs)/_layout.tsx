@@ -4,7 +4,7 @@ import { useColorScheme } from '~/lib/useColorScheme';
 import { NAV_THEME } from '~/lib/constants';
 
 export default function TabLayout() {
-  const {colorScheme} = useColorScheme();
+  const { colorScheme } = useColorScheme();
   const theme = colorScheme === 'dark' ? NAV_THEME.dark : NAV_THEME.light;
 
   return (
@@ -22,7 +22,8 @@ export default function TabLayout() {
         headerTitleStyle: {
           color: theme.text,
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -60,12 +61,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           title: 'Profile',
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile/image-manager"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="my-travel-notes"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

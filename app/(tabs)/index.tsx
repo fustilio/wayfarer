@@ -13,6 +13,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
+import { IMAGE }from '~/mocks'
 
 export default function ExploreScreen() {
   const {colorScheme} = useColorScheme();
@@ -22,14 +23,14 @@ export default function ExploreScreen() {
     {
       id: '1',
       name: 'Kyoto, Japan',
-      image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e',
+      image: IMAGE.KYOTO,
       description:
         'Ancient temples, traditional gardens, and cultural experiences',
     },
     {
       id: '2',
       name: 'Barcelona, Spain',
-      image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded',
+      image: IMAGE.BARCELONA,
       description:
         'Modernist architecture, vibrant culture, and Mediterranean charm',
     },
@@ -40,14 +41,14 @@ export default function ExploreScreen() {
       id: '1',
       title: 'Traditional Tea Ceremony',
       location: 'Kyoto',
-      image: 'https://images.unsplash.com/photo-1545048702-79362697d413',
+      image: IMAGE.KYOTO,
       price: '$45',
     },
     {
       id: '2',
       title: 'Tapas Walking Tour',
       location: 'Barcelona',
-      image: 'https://images.unsplash.com/photo-1515443961218-a51367888e4b',
+      image: IMAGE.BARCELONA,
       price: '$35',
     },
   ];

@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { Button, View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { recognize } from 'react-native-tesseract-ocr';
+
 import { Card, CardContent } from '~/components/ui/card';
+import { Button } from '~/components/ui/button';
+
+async function recognize(input) {
+  return "to be implemented"
+}
 
 export default function CaptureScreen() {
   const cameraRef = useRef(null); 

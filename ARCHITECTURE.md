@@ -35,12 +35,10 @@ To achieve our purpose, Wayfarer is built upon the following key principles:
 
 **1.3. WHAT: Our Product - Wayfarer Mobile Application (MVP)**
 
-Wayfarer is a mobile application (MVP focused initially on iOS and Android) featuring the following core functionalities designed to deliver on our WHY and HOW:
+Wayfarer is a mobile application built with Expo (MVP focused initially on iOS and Android) featuring the following core functionalities designed to deliver on our WHY and HOW:
 
 * **For Emily, the Detail-Oriented Explorer:**
-    * **Panel Capture:**  Effortlessly capture information from museum and site panels using the device camera, including text extraction (OCR) and image capture.
-    * **My Travel Notes:**  A personal digital journal for storing captured panels, text notes, and organizing learning experiences by location and date, with basic keyword search.
-    * **Past Itinerary:** Upload photos, extract GPS location data, and plot these on a map to visualize past trips.
+    * **Panel Capture & My Travel Notes:**  Effortlessly capture information from museum and site panels using the device camera, including text extraction (OCR) and image capture, and create/organize notes.
 
 * **For Ben, the Off-the-Beaten-Path Seeker:**
     * **Hidden Gems:**  Curated lists of less-known attractions and authentic experiences for select destinations, including descriptions, photos, and map locations.
@@ -83,9 +81,7 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 **3.1. Feature Set: Content Capture & Organization (For Emily)**
 
 * **Key Features:**
-    * **Panel Capture:** Camera-based capture of exhibit panels with OCR text extraction and image saving.
-    * **My Travel Notes:**  Location-based digital notes for storing captured panels and text notes, with basic search and organization.
-    * **Past Itinerary:** Upload photos, extract GPS location data, and plot these on a map to visualize past trips.
+    * **Panel Capture & My Travel Notes:** Camera-based capture of exhibit panels with OCR text extraction and image saving, and location-based digital notes for storing captured panels and text notes, with basic search and organization.
 
 * **User Stories:**
 
@@ -96,10 +92,6 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
     * **As Emily,** **I want "My Travel Notes" to organize my notes by location and date**, so I can easily find notes from specific places and time periods.
     * **As Emily,** **I want to be able to search my "My Travel Notes" by keywords**, so I can quickly find information on specific topics I learned about during my travels.
     * **As Emily,** when visiting a museum with poor internet connectivity, **I need "Panel Capture" and "My Travel Notes" to work offline**, so I can still capture information and access my notes without interruption.
-    * **As Emily,** after a trip, **I want to upload photos from my camera roll to the "Past Itinerary" feature**, so I can visualize my journey on a map.
-    * **As Emily,** **I want the app to automatically extract GPS location data from my photos and plot them on a map in "Past Itinerary"**, so I can see where I took each photo.
-    * **As Emily,** **I want to be able to add notes and descriptions to each photo in "Past Itinerary"**, so I can remember the context and details of each moment.
-    * **As Emily,** **I want to be able to view my "Past Itinerary" as a timeline or a map**, so I can easily recount my trip and see the route I took.
 
 **3.2. Feature Set: Authentic Cultural Immersion (For Ben)**
 
@@ -171,7 +163,7 @@ graph LR
 **Diagram Explanation:**
 
 * **Mobile Application (Wayfarer App):** Represents the user-facing mobile application.
-    * **Features:**  Highlights the core MVP features: Panel Capture, My Travel Notes, Hidden Gems, Local Insights, and Local Story Submission.
+    * **Features:**  Highlights the core MVP features: Panel Capture & My Travel Notes, Hidden Gems, Local Insights, and Local Story Submission.
     * **User Interface (Mobile):**  The visual interface through which users interact with the app.
     * **Data Storage (Offline):**  Indicates local storage for "My Travel Notes" to enable offline access.
     * **API Requests:** The mobile app communicates with the Backend API to fetch content.
@@ -196,14 +188,12 @@ graph LR
     A[Home Screen] --> B{Destinations};
     B -- Tap Destination --> C[Hidden Gems];
     B -- Tap Destination --> D[Local Insights];
-    A --> E[Panel Capture];
-    E --> F[My Travel Notes];
+    A --> E[Panel Capture & My Travel Notes];
     A --> G[Local Story Submission];
     C --> H{Destination Details};
     D --> H;
-    F --> H;
+    E --> H;
     G --> I[Submission Confirmation];
-    A --> L[Past Itinerary];
 ```
 
 ### 7. Future Enhancements (Post-MVP Roadmap)

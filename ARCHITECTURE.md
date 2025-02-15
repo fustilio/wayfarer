@@ -40,6 +40,7 @@ Wayfarer is a mobile application (MVP focused initially on iOS and Android) feat
 * **For Emily, the Detail-Oriented Explorer:**
     * **Panel Capture:**  Effortlessly capture information from museum and site panels using the device camera, including text extraction (OCR) and image capture.
     * **My Travel Notes:**  A personal digital journal for storing captured panels, text notes, and organizing learning experiences by location and date, with basic keyword search.
+    * **Past Itinerary:** Upload photos, extract GPS location data, and plot these on a map to visualize past trips.
 
 * **For Ben, the Off-the-Beaten-Path Seeker:**
     * **Hidden Gems:**  Curated lists of less-known attractions and authentic experiences for select destinations, including descriptions, photos, and map locations.
@@ -84,6 +85,7 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 * **Key Features:**
     * **Panel Capture:** Camera-based capture of exhibit panels with OCR text extraction and image saving.
     * **My Travel Notes:**  Location-based digital notes for storing captured panels and text notes, with basic search and organization.
+    * **Past Itinerary:** Upload photos, extract GPS location data, and plot these on a map to visualize past trips.
 
 * **User Stories:**
 
@@ -94,6 +96,10 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
     * **As Emily,** **I want "My Travel Notes" to organize my notes by location and date**, so I can easily find notes from specific places and time periods.
     * **As Emily,** **I want to be able to search my "My Travel Notes" by keywords**, so I can quickly find information on specific topics I learned about during my travels.
     * **As Emily,** when visiting a museum with poor internet connectivity, **I need "Panel Capture" and "My Travel Notes" to work offline**, so I can still capture information and access my notes without interruption.
+    * **As Emily,** after a trip, **I want to upload photos from my camera roll to the "Past Itinerary" feature**, so I can visualize my journey on a map.
+    * **As Emily,** **I want the app to automatically extract GPS location data from my photos and plot them on a map in "Past Itinerary"**, so I can see where I took each photo.
+    * **As Emily,** **I want to be able to add notes and descriptions to each photo in "Past Itinerary"**, so I can remember the context and details of each moment.
+    * **As Emily,** **I want to be able to view my "Past Itinerary" as a timeline or a map**, so I can easily recount my trip and see the route I took.
 
 **3.2. Feature Set: Authentic Cultural Immersion (For Ben)**
 
@@ -130,6 +136,7 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 |----------------------|-----------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------|
 | **Panel Capture**    | Camera-based capture & OCR of exhibit panels                                 | Emily              | Effortless information capture, reduces note-taking burden                 |
 | **My Travel Notes**  | Location-based digital journal for notes and captured panels                 | Emily              | Organized learning, easy information retrieval, offline access           |
+| **Past Itinerary**   | Upload photos, extract GPS, plot on map                                     | Emily              | Visualize past trips, recount journey, remember details                   |
 | **Hidden Gems**      | Curated lists of off-the-beaten-path attractions for select destinations       | Ben                | Discovery of authentic experiences, beyond tourist traps                   |
 | **Local Insights**   | Basic directory of local experts for select destinations                       | Ben                | Connection with local perspectives, insider knowledge access             |
 | **Local Story Submission** | Form for locals to submit cultural stories for curation and potential publication | Carlos             | Platform to share cultural knowledge, reach a global travel audience      |
@@ -182,7 +189,24 @@ graph LR
     * "Panel Capture" utilizes an external OCR API.
     * Local Story submissions are processed by the Wayfarer team and stored in the Content Database.
 
-### 6. Future Enhancements (Post-MVP Roadmap)
+### 6. Information Architecture Diagram
+
+```mermaid
+graph LR
+    A[Home Screen] --> B{Destinations};
+    B -- Tap Destination --> C[Hidden Gems];
+    B -- Tap Destination --> D[Local Insights];
+    A --> E[Panel Capture];
+    E --> F[My Travel Notes];
+    A --> G[Local Story Submission];
+    C --> H{Destination Details};
+    D --> H;
+    F --> H;
+    G --> I[Submission Confirmation];
+    A --> L[Past Itinerary];
+```
+
+### 7. Future Enhancements (Post-MVP Roadmap)
 
 Following the MVP release, we plan to expand Wayfarer with the following features and enhancements, based on user feedback and evolving needs:
 
@@ -191,6 +215,7 @@ Following the MVP release, we plan to expand Wayfarer with the following feature
 * **Full "Local Insights" Platform:**  Develop robust profiles for locals, in-app messaging, user reviews and ratings, verification system for Wayfarer.
 * **Advanced "Hidden Gems":**  User-generated reviews and ratings, more detailed filtering options, saving to itinerary, expanded location coverage.
 * **Full "Local Stories" Platform:**  User profiles for locals, content management dashboard for locals, user interaction features (comments, questions).
+* **Past Itinerary Enhancements:**  Integration with social media, advanced map views, trip sharing capabilities.
 * **Cultural Deep Dives:**  Expand content to include in-depth articles, videos, and interactive content on local cultures.
 * **Multilingual Content & Interface:**  Implement automated translation for content and localize the app interface for multiple languages.
 * **Booking & Payments:** Integrate booking and payment functionality for local tours and experiences offered through the platform.

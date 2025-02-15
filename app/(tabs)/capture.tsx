@@ -1,7 +1,51 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+
+import { Camera, CameraType } from 'expo-camera';
+import { recognize } from 'react-native-tesseract-ocr';
+import MyTravelNotes from './my-travel-notes';
+
 export default function CaptureScreen() {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(CameraType.back);
+  const [camera, setCamera] = useState(null);
+  const [recognizedText, setRecognizedText] = useState('');
+  const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const takePicture = async () => {
+    if (camera) {
+      const data = await camera.takePictureAsync(null);
+      console.log('picture', data.uri);
+      setCapturedImageUri(data.uri);
+
+      try {
+        const text = await recognize(data.uri, { lang: 'eng', tessPath: 'tessdata' });
+        console.log('Recognized Text:', text);
+        setRecognizedText(text);
+        Alert.alert('Recognized Text', text);
+      } catch (err) {
+        console.error(err);
+        Alert.alert('Error', 'Could not recognize text.');
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -11,7 +55,22 @@ export default function CaptureScreen() {
         </Text>
       </View>
 
-      <Pressable style={styles.captureButton}>
+      <Camera
+        style={styles.camera}
+        type={type}
+        ref={(ref) => {
+          setCamera(ref);
+        }}>
+        <View style={styles.buttonContainer}>
+          <Pressable style={styles.flipButton} onPress={() => {
+              setType(type === CameraType.back ? CameraType.front : CameraType.back);
+            }}>
+            <Ionicons name="camera-reverse" size={32} color="white" />
+          </Pressable>
+        </View>
+      </Camera>
+
+      <Pressable style={styles.captureButton} onPress={takePicture}>
         <Ionicons name="camera" size={32} color="#FFFFFF" />
         <Text style={styles.captureText}>Take Photo</Text>
       </Pressable>
@@ -49,6 +108,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     padding: 20,
   },
+  camera: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    margin: 20,
+  },
+  flipButton: {
+    flex: 0.1,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
   header: {
     marginTop: 40,
     marginBottom: 40,
@@ -63,6 +139,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     lineHeight: 24,
+  },
+  captureButton: {
+    backgroundColor: '#2563EB',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  captureText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 8,
   },
   captureButton: {
     backgroundColor: '#2563EB',

@@ -34,3 +34,6 @@ yarn-error.*
 *.tsbuildinfo
 
 .aider*
+
+# build files
+android

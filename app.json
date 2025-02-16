@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.laliaoperative.wayfarer"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,12 @@
         {
           "android": {}
         }
+      ],
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "<FILL_THIS_IN>"
+        }
       ]
     ],
     "experiments": {
@@ -60,7 +67,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "2640f94f-9aab-4742-ab2c-879448370f65"
+        "projectId": "baf709a4-3453-4adb-92e7-b23e6bc11f86"
       }
     }
   }

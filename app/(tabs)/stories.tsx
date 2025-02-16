@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
 import MapView from 'react-native-maps';
 
-Mapbox.setAccessToken('<FILL_THIS_IN>');
+Mapbox.setAccessToken(process.env.MAPBOX_ACCESS_TOKEN);
 
 export default function StoriesScreen() {
   const stories = [

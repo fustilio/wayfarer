@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "android": "expo run:android",
-    "build:dev": "eas build --profile development --platform android",
+    "build:dev": "eas build --profile development --platform android --local",
     "build:web": "expo export --platform web",
     "dev": "cross-env EXPO_NO_TELEMETRY=1 expo run android --device",
     "ios": "expo run:ios",
@@ -41,6 +41,7 @@
     "@rn-primitives/toggle-group": "^1.1.0",
     "@rn-primitives/tooltip": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
+    "@rnmapbox/maps": "^10.1.33",
     "@supabase/supabase-js": "^2.48.1",
     "ai": "^4.1.41",
     "base64-arraybuffer": "^1.0.2",

@@ -1,12 +1,15 @@
 import { View, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { PROVIDER_GOOGLE } from 'react-native-maps';
+import Mapbox from '@rnmapbox/maps';
+
 
 import { Text } from "~/components/ui/text";
 import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
 import MapView from 'react-native-maps';
+
+Mapbox.setAccessToken('<FILL_THIS_IN>');
 
 export default function StoriesScreen() {
   const stories = [
@@ -38,17 +41,16 @@ export default function StoriesScreen() {
           Discover authentic experiences shared by locals
         </Text>
       </View>
-      <MapView
-        style={{ width: '100%',
-          height: 300,  }}  // Adjust height as needed
-        provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+
+      <View style={styles.page}>
+      <View style={styles.container}>
+        <Mapbox.MapView style={styles.map} 
+         onDidFinishLoadingStyle={() => {
+          console.log('Map loaded successfully');
         }}
-      />
+        />
+      </View>
+    </View>
 
       {stories.map((story) => (
         <Card key={story.id} style={styles.storyCard}>
@@ -87,8 +89,8 @@ export default function StoriesScreen() {
 
 const styles = StyleSheet.create({
   map: {
-    width: '100%',
-    height: '100%',
+    width: '500',
+    height: '500',
   },
   container: {
     flex: 1,

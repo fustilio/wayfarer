@@ -85,13 +85,13 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 
 * **User Stories:**
 
-    * **As Emily,** when I am at a museum exhibit with a lot of text panels, **I want to use "Panel Capture" to quickly take a photo and extract the text**, so I don't have to spend time writing everything down manually.
-    * **As Emily,** after capturing a panel, **I want to be able to review and edit the extracted text**, so I can correct any OCR errors and ensure accuracy.
-    * **As Emily,** **I want "Panel Capture" to automatically save the image and extracted text into "My Travel Notes"**, so I can keep all my learning materials organized in one place.
-    * **As Emily,** in "My Travel Notes," **I want to be able to create new text notes in addition to captured panels**, so I can add my own thoughts, reflections, and additional information.
-    * **As Emily,** **I want "My Travel Notes" to organize my notes by location and date**, so I can easily find notes from specific places and time periods.
-    * **As Emily,** **I want to be able to search my "My Travel Notes" by keywords**, so I can quickly find information on specific topics I learned about during my travels.
-    * **As Emily,** when visiting a museum with poor internet connectivity, **I need "Panel Capture" and "My Travel Notes" to work offline**, so I can still capture information and access my notes without interruption.
+    * **As Emily,** when I am at a museum exhibit with a lot of text panels, **I want to use "Panel Capture" to quickly take a photo and extract the text**, so I don't have to spend time writing everything down manually. (Not yet implemented)
+    * **As Emily,** after capturing a panel, **I want to be able to review and edit the extracted text**, so I can correct any OCR errors and ensure accuracy. (Not yet implemented)
+    * **As Emily,** **I want "Panel Capture" to automatically save the image and extracted text into "My Travel Notes"**, so I can keep all my learning materials organized in one place. (Not yet implemented)
+    * **As Emily,** in "My Travel Notes," **I want to be able to create new text notes in addition to captured panels**, so I can add my own thoughts, reflections, and additional information. (Not yet implemented)
+    * **As Emily,** **I want "My Travel Notes" to organize my notes by location and date**, so I can easily find notes from specific places and time periods. (Not yet implemented)
+    * **As Emily,** **I want to be able to search my "My Travel Notes" by keywords**, so I can quickly find information on specific topics I learned about during my travels. (Not yet implemented)
+    * **As Emily,** when visiting a museum with poor internet connectivity, **I need "Panel Capture" and "My Travel Notes" to work offline**, so I can still capture information and access my notes without interruption. (Not yet implemented)
 
 **3.2. Feature Set: Authentic Cultural Immersion (For Ben)**
 
@@ -128,7 +128,6 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 |----------------------|-----------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------|
 | **Panel Capture**    | Camera-based capture & OCR of exhibit panels                                 | Emily              | Effortless information capture, reduces note-taking burden                 |
 | **My Travel Notes**  | Location-based digital journal for notes and captured panels                 | Emily              | Organized learning, easy information retrieval, offline access           |
-| **Past Itinerary**   | Upload photos, extract GPS, plot on map                                     | Emily              | Visualize past trips, recount journey, remember details                   |
 | **Hidden Gems**      | Curated lists of off-the-beaten-path attractions for select destinations       | Ben                | Discovery of authentic experiences, beyond tourist traps                   |
 | **Local Insights**   | Basic directory of local experts for select destinations                       | Ben                | Connection with local perspectives, insider knowledge access             |
 | **Local Story Submission** | Form for locals to submit cultural stories for curation and potential publication | Carlos             | Platform to share cultural knowledge, reach a global travel audience      |
@@ -138,11 +137,9 @@ This section details the feature sets within Wayfarer MVP, outlining key feature
 ```mermaid
 graph LR
     subgraph "Mobile Application (Wayfarer App)"
-        A[Panel Capture Feature] --> B["My Travel Notes Feature"];
         C["Hidden Gems Feature"] --> D["Display to User"];
         E["Local Insights Feature"] --> D;
         F["Local Story Submission Form (in-app/web)"] --> G["Wayfarer Team (Curators)"];
-        B --> D;
         D --> H["User Interface (Mobile)"];
     end
 
@@ -155,7 +152,6 @@ graph LR
     end
 
     H -- API Requests --> J;
-    H -- Data Storage (Offline) --> B;
     F -- Submission Data --> I;
     A -- OCR Request --> K;
 ```
@@ -188,11 +184,9 @@ graph LR
     A[Home Screen] --> B{Destinations};
     B -- Tap Destination --> C[Hidden Gems];
     B -- Tap Destination --> D[Local Insights];
-    A --> E[Panel Capture & My Travel Notes];
     A --> G[Local Story Submission];
     C --> H{Destination Details};
     D --> H;
-    E --> H;
     G --> I[Submission Confirmation];
 ```
 

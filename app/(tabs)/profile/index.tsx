@@ -168,7 +168,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#6B7280" />
         </Pressable>
 
-        {/* <ThemeToggle /> */}
+        <ThemeToggle />
       </View>
       {session ? (
         <View>

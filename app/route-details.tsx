@@ -1,21 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image, ScrollView, Alert, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 import { Text } from '~/components/ui/text';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 
+// Define the interfaces (Coordinate, Route, LocalStorageData) as above
+
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+
+interface Route {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  image: string;
+  pois: string[];
+  coordinates: Coordinate[];
+}
+
+interface LocalStorageData {
+  [routeId: string]: Route;
+}
+
+const STORAGE_KEY = 'wayfarer_routes';
+
 export default function RouteDetailsScreen() {
   const { id } = useLocalSearchParams();
   const [newPoi, setNewPoi] = useState('');
   const [editingPoiId, setEditingPoiId] = useState<string | null>(null);
   const [editedPoiText, setEditedPoiText] = useState('');
+  const [route, setRoute] = useState<Route | null>(null); // Route state
 
-  // Mock curatedRoutes data (replace with actual data fetching)
-  const [curatedRoutes, setCuratedRoutes] = useState([
-    {
+  useEffect(() => {
+    const loadRoute = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+        setRoute(data[id as string] || null);
+      } catch (e) {
+        console.error('Error loading route from AsyncStorage:', e);
+      }
+    };
+
+    loadRoute();
+  }, [id]);
+
+  // Initial mock data (for first-time use or if AsyncStorage is empty)
+  const initialCuratedRoutes: LocalStorageData = {
+    '1': {
       id: '1',
       title: 'Historical Kyoto',
       description: "Explore Kyoto's most iconic temples and shrines.",
@@ -32,7 +71,7 @@ export default function RouteDetailsScreen() {
         { latitude: 34.9851, longitude: 135.7856 },
       ],
     },
-    {
+    '2': {
       id: '2',
       title: "Barcelona's Modernist Architecture",
       description: 'Discover the architectural wonders of Antoni Gaudí.',
@@ -45,25 +84,49 @@ export default function RouteDetailsScreen() {
         { latitude: 41.3919, longitude: 2.164 },
       ],
     },
-  ]);
+  };
 
-  const route = curatedRoutes.find((route) => route.id === id);
+  useEffect(() => {
+    const initializeRoute = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+        let data = jsonValue != null ? JSON.parse(jsonValue) : {};
 
-  if (!route) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text>Route not found</Text>
-      </View>
-    );
-  }
+        if (!data[id as string]) {
+          // If the route doesn't exist in AsyncStorage, initialize it from initialCuratedRoutes
+          const initialRoute = initialCuratedRoutes[id as string];
+          if (initialRoute) {
+            data[id as string] = initialRoute;
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            setRoute(initialRoute);
+          }
+        }
+      } catch (e) {
+        console.error('Error initializing route from AsyncStorage:', e);
+      }
+    };
 
-  const handleAddPoi = () => {
-    if (newPoi) {
-      const updatedRoutes = curatedRoutes.map((r) =>
-        r.id === id ? { ...r, pois: [...r.pois, newPoi] } : r
-      );
-      setCuratedRoutes(updatedRoutes);
-      setNewPoi('');
+    initializeRoute();
+  }, [id]);
+
+  const handleAddPoi = async () => {
+    if (newPoi && route) {
+      const updatedRoute: Route = {
+        ...route,
+        pois: [...route.pois, newPoi],
+        coordinates: [...route.coordinates, { latitude: 0, longitude: 0 }], // TODO: add coordinate input
+      };
+
+      try {
+        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+        data[id as string] = updatedRoute;
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setRoute(updatedRoute);
+        setNewPoi('');
+      } catch (e) {
+        console.error('Error saving route to AsyncStorage:', e);
+      }
     }
   };
 
@@ -72,21 +135,28 @@ export default function RouteDetailsScreen() {
     setEditedPoiText(poiText);
   };
 
-  const handleSavePoi = (index: number) => {
-    const updatedRoutes = curatedRoutes.map((r) =>
-      r.id === id
-        ? {
-            ...r,
-            pois: r.pois.map((poi, i) => (i === index ? editedPoiText : poi)),
-          }
-        : r
-    );
-    setCuratedRoutes(updatedRoutes);
-    setEditingPoiId(null);
-    setEditedPoiText('');
+  const handleSavePoi = async (index: number) => {
+    if (route) {
+      const updatedRoute: Route = {
+        ...route,
+        pois: route.pois.map((poi, i) => (i === index ? editedPoiText : poi)),
+      };
+
+      try {
+        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+        data[id as string] = updatedRoute;
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setRoute(updatedRoute);
+        setEditingPoiId(null);
+        setEditedPoiText('');
+      } catch (e) {
+        console.error('Error saving route to AsyncStorage:', e);
+      }
+    }
   };
 
-  const handleDeletePoi = (index: number) => {
+  const handleDeletePoi = async (index: number) => {
     Alert.alert(
       'Delete POI',
       'Are you sure you want to delete this point of interest?',
@@ -94,18 +164,37 @@ export default function RouteDetailsScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'OK',
-          onPress: () => {
-            const updatedRoutes = curatedRoutes.map((r) =>
-              r.id === id
-                ? { ...r, pois: r.pois.filter((_, i) => i !== index) }
-                : r
-            );
-            setCuratedRoutes(updatedRoutes);
+          onPress: async () => {
+            if (route) {
+              const updatedRoute: Route = {
+                ...route,
+                pois: route.pois.filter((_, i) => i !== index),
+                coordinates: route.coordinates.filter((_, i) => i !== index),
+              };
+
+              try {
+                const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+                const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+                data[id as string] = updatedRoute;
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                setRoute(updatedRoute);
+              } catch (e) {
+                console.error('Error saving route to AsyncStorage:', e);
+              }
+            }
           },
         },
       ]
     );
   };
+
+  if (!route) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Route not found</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView className="flex-1">

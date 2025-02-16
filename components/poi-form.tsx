@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Alert, Platform } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';
 import { Input } from '~/components/ui/input';
 import { PointOfInformation } from '~/lib/schemas';
+import * as Location from 'expo-location';
 
 interface PoiFormProps {
   onSubmit: (poi: PointOfInformation) => void;
@@ -26,6 +27,41 @@ const PoiForm: React.FC<PoiFormProps> = ({
   const [longitude, setLongitude] = useState(
     String(initialValues?.coordinates.longitude || '')
   );
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS === 'android') {
+        setErrorMsg(
+          'Oops, this will not work on Snack in an Android Emulator. Try it on your device!'
+        );
+        return;
+      }
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+    })();
+  }, []);
+
+ const getCurrentLocation = async () => {
+    let { status } = await Location.getForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Location permission denied',
+        'Please enable location permissions in your device settings to use this feature.'
+      );
+      return;
+    }
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      setLatitude(String(location.coords.latitude));
+      setLongitude(String(location.coords.longitude));
+    } catch (error) {
+      Alert.alert('Error getting location', error.message);
+    }
+  };
 
   const handleSubmit = () => {
     const poi: PointOfInformation = {
@@ -46,9 +82,9 @@ const PoiForm: React.FC<PoiFormProps> = ({
         <Input placeholder="Name" value={name} onChangeText={setName} />
       </View>
       <View className="grid gap-2">
-        <Text>Text</Text>
+        <Text>Description</Text>
         <Input
-          placeholder="Text"
+          placeholder="Description"
           value={description}
           onChangeText={setDescription}
         />
@@ -69,10 +105,14 @@ const PoiForm: React.FC<PoiFormProps> = ({
           onChangeText={(text) => setLongitude(text)}
         />
       </View>
+      <Button onPress={getCurrentLocation}>
+        <Text>Get Current Location</Text>
+      </Button>
+      {errorMsg && <Text>Error: {errorMsg}</Text>}
       <View className="flex flex-row justify-end">
         {onCancel && (
           <Button variant="secondary" className="mr-2" onPress={onCancel}>
-            Cancel
+            <Text>Cancel</Text>
           </Button>
         )}
         <Button onPress={handleSubmit}>

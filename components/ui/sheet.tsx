@@ -14,7 +14,7 @@ import Animated, {
 import * as SheetPrimitive from "@rn-primitives/dialog";
 import { cva } from "class-variance-authority";
 
-import { X } from "~/lib/icons/X";
+import { X } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
 const Sheet = SheetPrimitive.Root;

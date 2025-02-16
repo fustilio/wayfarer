@@ -2,18 +2,49 @@ import { getDistance as geolibGetDistance } from 'geolib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Coordinate, LocalStorageData, PointOfInformation, Route } from './schemas';
 import { curatedRoutes } from './route-data';
+import { StorageInterface } from './storage-interface';
 
 export const STORAGE_KEY = 'wayfarer_routes_v2';
 
-const getRoute = async (routeId: string): Promise<Route | null> => {
-  try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    return data[routeId] || null;
-  } catch (e) {
-    console.error('Error loading route from AsyncStorage:', e);
-    return null;
+class AsyncStorageService implements StorageInterface {
+  async loadRoute(id: string): Promise<Route | null> {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+      return data[id] || null;
+    } catch (e) {
+      console.error('Error loading route from AsyncStorage:', e);
+      return null;
+    }
   }
+
+  async saveRoute(id: string, route: Route): Promise<void> {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+      data[id] = route;
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Error saving route to AsyncStorage:', e);
+    }
+  }
+
+  async deleteRoute(id: string): Promise<void> {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+      delete data[id];
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Error deleting route from AsyncStorage:', e);
+    }
+  }
+}
+
+const storageService = new AsyncStorageService();
+
+const getRoute = async (routeId: string): Promise<Route | null> => {
+  return storageService.loadRoute(routeId);
 };
 
 const addPoi = async (
@@ -25,13 +56,8 @@ const addPoi = async (
     const updatedRoute: Route = {
       ...route,
       pointsOfInformation: [...route.pointsOfInformation, newPointOfInformation],
-
     };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    await storageService.saveRoute(routeId, updatedRoute);
     return updatedRoute;
   } catch (e) {
     console.error('Error saving route to AsyncStorage:', e);
@@ -50,11 +76,7 @@ const editPoi = async (
       ...route,
       pointsOfInformation: route.pointsOfInformation.map((pointOfInformation, i) => (i === index ? editedPointOfInformation : pointOfInformation)),
     };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    await storageService.saveRoute(routeId, updatedRoute);
     return updatedRoute;
   } catch (e) {
     console.error('Error saving route to AsyncStorage:', e);
@@ -72,11 +94,7 @@ const deletePoi = async (
       ...route,
       pointsOfInformation: route.pointsOfInformation.filter((_, i) => i !== index),
     };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    await storageService.saveRoute(routeId, updatedRoute);
     return updatedRoute;
   } catch (e) {
     console.error('Error saving route to AsyncStorage:', e);
@@ -85,14 +103,7 @@ const deletePoi = async (
 };
 
 const loadRoute = async (routeId: string): Promise<Route | null> => {
-  try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : curatedRoutes;
-    return data[routeId] || null;
-  } catch (e) {
-    console.error('Error loading route from AsyncStorage:', e);
-    return null;
-  }
+    return storageService.loadRoute(routeId);
 };
 
 const getDistance = (start: Coordinate, end: Coordinate): number => {

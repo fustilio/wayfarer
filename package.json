@@ -19,6 +19,7 @@
     "@ai-sdk/react": "^1.1.16",
     "@babel/runtime": "^7.26.9",
     "@expo/vector-icons": "^14.0.2",
+    "@gorhom/bottom-sheet": "5",
     "@mgcrea/react-native-dnd": "^2.5.3",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
@@ -94,7 +95,7 @@
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
     "typescript": "^5.3.3",
-    "vitest": "^3.0.5",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.5"
   }
 }

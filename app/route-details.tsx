@@ -1,93 +1,128 @@
-import { useState, useEffect } from 'react';
-import { Image, ScrollView, Alert, View } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Image,
+  ScrollView,
+  Alert,
+  View,
+  StyleSheet,
+  Pressable,
+} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-
+import { Feather } from '@expo/vector-icons';
 import { Text } from '~/components/ui/text';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { LocalStorageData, Route, getRoute, addPoi, editPoi, deletePoi } from '~/lib/route-data';
+import {
+  LocalStorageData,
+  Route,
+  getRoute,
+  addPoi,
+  editPoi,
+  deletePoi,
+  Coordinate,
+  loadRoute,
+} from '~/lib/route-data';
+import MapView, { Marker, Polyline } from 'react-native-maps';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ButtonWithIcon } from '~/components/ui/button-with-icon';
+import { Pencil, Trash } from '~/lib/icons';
+import { useColorScheme } from '~/lib/useColorScheme';
 
 const STORAGE_KEY = 'wayfarer_routes';
 
 export default function RouteDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const { colorScheme } = useColorScheme();
   const [newPoi, setNewPoi] = useState('');
   const [editingPoiId, setEditingPoiId] = useState<string | null>(null);
   const [editedPoiText, setEditedPoiText] = useState('');
-  const [route, setRoute] = useState<Route | null>(null); // Route state
+  const [route, setRoute] = useState<Route | null>(null);
+
+  const loadRouteData = useCallback(async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+      setRoute(data[id as string] || null);
+    } catch (e) {
+      console.error('Error loading route from AsyncStorage:', e);
+    }
+  }, [id]);
 
   useEffect(() => {
-    const loadRoute = async () => {
+    loadRouteData();
+  }, [loadRouteData, id]);
+
+  const handleMovePoiUp = async (index: number) => {
+    if (route && index > 0) {
+      const newPois = [...route.pois];
+      const newCoordinates = [...route.coordinates];
+
+      // Swap POIs
+      [newPois[index], newPois[index - 1]] = [
+        newPois[index - 1],
+        newPois[index],
+      ];
+
+      // Swap Coordinates
+      [newCoordinates[index], newCoordinates[index - 1]] = [
+        newCoordinates[index - 1],
+        newCoordinates[index],
+      ];
+
+      const updatedRoute: Route = {
+        ...route,
+        pois: newPois,
+        coordinates: newCoordinates,
+      };
+
       try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
         const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-        setRoute(data[id as string] || null);
+        data[id as string] = updatedRoute;
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setRoute(updatedRoute);
       } catch (e) {
-        console.error('Error loading route from AsyncStorage:', e);
+        console.error('Error saving route to AsyncStorage:', e);
       }
-    };
-
-    loadRoute();
-  }, [id]);
-
-  // Initial mock data (for first-time use or if AsyncStorage is empty)
-  const initialCuratedRoutes: LocalStorageData = {
-    '1': {
-      id: '1',
-      title: 'Historical Kyoto',
-      description: "Explore Kyoto's most iconic temples and shrines.",
-      duration: 'Full-day',
-      image: 'https://images.unsplash.com/photo-1557330311-99d2c80536ca',
-      pois: [
-        'Kinkaku-ji (Golden Pavilion)',
-        'Fushimi Inari Shrine',
-        'Kiyomizu-dera Temple',
-      ],
-      coordinates: [
-        { latitude: 34.9916, longitude: 135.7481 },
-        { latitude: 34.967, longitude: 135.7684 },
-        { latitude: 34.9851, longitude: 135.7856 },
-      ],
-    },
-    '2': {
-      id: '2',
-      title: "Barcelona's Modernist Architecture",
-      description: 'Discover the architectural wonders of Antoni Gaudí.',
-      duration: 'Full-day',
-      image: 'https://images.unsplash.com/photo-1560184845-78c0849ada71',
-      pois: ['Sagrada Familia', 'Park Güell', 'Casa Batlló'],
-      coordinates: [
-        { latitude: 41.4036, longitude: 2.1744 },
-        { latitude: 41.4148, longitude: 2.1544 },
-        { latitude: 41.3919, longitude: 2.164 },
-      ],
-    },
+    }
   };
 
-  useEffect(() => {
-    const initializeRoute = async () => {
+  const handleMovePoiDown = async (index: number) => {
+    if (route && index < route.pois.length - 1) {
+      const newPois = [...route.pois];
+      const newCoordinates = [...route.coordinates];
+
+      // Swap POIs
+      [newPois[index], newPois[index + 1]] = [
+        newPois[index + 1],
+        newPois[index],
+      ];
+
+      // Swap Coordinates
+      [newCoordinates[index], newCoordinates[index + 1]] = [
+        newCoordinates[index + 1],
+        newCoordinates[index],
+      ];
+
+      const updatedRoute: Route = {
+        ...route,
+        pois: newPois,
+        coordinates: newCoordinates,
+      };
+
       try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        let data = jsonValue != null ? JSON.parse(jsonValue) : {};
-
-        if (!data[id as string]) {
-          // If the route doesn't exist in AsyncStorage, initialize it from initialCuratedRoutes
-          const initialRoute = initialCuratedRoutes[id as string];
-          if (initialRoute) {
-            data[id as string] = initialRoute;
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            setRoute(initialRoute);
-          }
-        }
+        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
+        data[id as string] = updatedRoute;
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setRoute(updatedRoute);
       } catch (e) {
-        console.error('Error initializing route from AsyncStorage:', e);
+        console.error('Error saving route to AsyncStorage:', e);
       }
-    };
-
-    initializeRoute();
-  }, [id]);
+    }
+  };
 
   const handleAddPoi = async () => {
     if (newPoi && route) {
@@ -108,7 +143,12 @@ export default function RouteDetailsScreen() {
 
   const handleSavePoi = async (index: number) => {
     if (route) {
-      const updatedRoute = await editPoi(id as string, index, editedPoiText, route);
+      const updatedRoute = await editPoi(
+        id as string,
+        index,
+        editedPoiText,
+        route
+      );
       if (updatedRoute) {
         setRoute(updatedRoute);
         setEditingPoiId(null);
@@ -160,55 +200,115 @@ export default function RouteDetailsScreen() {
           Duration:
           {route.duration}
         </Text>
-        <Text className="text-xl font-bold mt-2 mb-2">Points of Interest:</Text>
+        {/* <Text className="text-xl font-bold mt-2 mb-2">Route Map:</Text>
+          <MapView
+            style={{ height: 300, width: '100%', marginBottom: 20 }}
+            initialRegion={{
+              latitude: route.coordinates[0].latitude,
+              longitude: route.coordinates[0].longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          >
+            <Polyline
+              coordinates={route.coordinates}
+              strokeColor="#000" // fallback for when `strokeColors` is not supported
+              strokeWidth={6}
+            />
+            {route.pois.map((poi, index) => (
+              <Marker
+                key={index}
+                coordinate={route.coordinates[index]}
+                title={poi}
+              />
+            ))}
+          </MapView> */}
 
+        <Text className="text-xl font-bold mt-2 mb-2">Points of Interest:</Text>
         {route.pois.map((poi, index) => (
           <Card
             key={index}
             className="flex-row items-center justify-between mb-2 rounded-md shadow-sm"
           >
-            {editingPoiId === String(index) ? (
-              <Input
-                className="flex-1 p-2 border border-gray-300 rounded-md"
-                value={editedPoiText}
-                onChangeText={setEditedPoiText}
-                onBlur={() => handleSavePoi(index)}
-              />
-            ) : (
-              <Text>- {poi}</Text>
-            )}
-
-            {editingPoiId === String(index) ? (
-              <View className="flex-row">
-                <Button
-                  onPress={() => handleSavePoi(index)}
-                  className=" rounded-md px-3 py-1 ml-2"
-                >
-                  <Text>Save</Text>
-                </Button>
-                <Button
-                  onPress={() => setEditingPoiId(null)}
-                  className=" rounded-md px-3 py-1 ml-2"
-                >
-                  <Text>Cancel</Text>
-                </Button>
-              </View>
-            ) : (
-              <View className="flex-row">
-                <Button
-                  onPress={() => handleEditPoi(String(index), poi)}
-                  className="bg-blue-500 rounded-md px-3 py-1 ml-2"
-                >
-                  <Text>Edit</Text>
-                </Button>
-                <Button
-                  onPress={() => handleDeletePoi(index)}
-                  className="bg-red-500  rounded-md px-3 py-1 ml-2"
-                >
-                  <Text>Delete</Text>
-                </Button>
-              </View>
-            )}
+            <View className="flex-row items-center flex-1">
+              {editingPoiId === String(index) ? (
+                <Input
+                  className="flex-1 p-2 border border-gray-300 rounded-md"
+                  value={editedPoiText}
+                  onChangeText={setEditedPoiText}
+                  onBlur={() => handleSavePoi(index)}
+                />
+              ) : (
+                <Text className="flex-1">- {poi}</Text>
+              )}
+            </View>
+            <View className="flex-row">
+              <Pressable
+                onPress={() => handleMovePoiUp(index)}
+                disabled={index === 0}
+                className="px-2"
+              >
+                <Feather
+                  name="arrow-up"
+                  size={20}
+                  color={
+                    index === 0
+                      ? 'gray'
+                      : colorScheme === 'dark'
+                      ? 'white'
+                      : 'black'
+                  }
+                />
+              </Pressable>
+              <Pressable
+                onPress={() => handleMovePoiDown(index)}
+                disabled={index === route.pois.length - 1}
+                className="px-2"
+              >
+                <Feather
+                  name="arrow-down"
+                  size={20}
+                  color={
+                    index === route.pois.length - 1
+                      ? 'gray'
+                      : colorScheme === 'dark'
+                      ? 'white'
+                      : 'black'
+                  }
+                />
+              </Pressable>
+              {editingPoiId === String(index) ? (
+                <View className="flex-row">
+                  <Button
+                    onPress={() => handleSavePoi(index)}
+                    className=" rounded-md px-3 py-1 ml-2"
+                  >
+                    <Text>Save</Text>
+                  </Button>
+                  <Button
+                    onPress={() => setEditingPoiId(null)}
+                    className=" rounded-md px-3 py-1 ml-2"
+                  >
+                    <Text>Cancel</Text>
+                  </Button>
+                </View>
+              ) : (
+                <View className="flex-row">
+                  <Button
+                    onPress={() => handleEditPoi(String(index), poi)}
+                    className="bg-blue-500 rounded-md px-3 py-1 ml-2"
+                  >
+                    <Pencil size={16} color="white" />
+                  </Button>
+                  <Button
+                    onPress={() => handleDeletePoi(index)}
+                    className="bg-red-500 rounded-md px-3 py-1 ml-2"
+                  >
+                    <Trash size={16} color="white" />
+                  </Button>
+                </View>
+              )}
+            </View>
           </Card>
         ))}
 

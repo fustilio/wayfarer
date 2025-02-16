@@ -107,5 +107,17 @@ const deletePoi = async (routeId: string, index: number, route: Route): Promise<
   }
 };
 
+
+const loadRoute = async (routeId: string): Promise<Route | null> => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    return data[routeId] || null;
+  } catch (e) {
+    console.error("Error loading route from AsyncStorage:", e);
+    return null;
+  }
+};
+
 export type { Coordinate, Route, LocalStorageData };
-export { getRoute, addPoi, editPoi, deletePoi };
+export { getRoute, addPoi, editPoi, deletePoi, loadRoute };

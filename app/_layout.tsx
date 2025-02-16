@@ -14,6 +14,7 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { supabase } from '~/lib/supabase';
 import { useSession } from '~/lib/auth';
+import { useEffect } from 'react';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -33,14 +34,16 @@ export default function RootLayout() {
   const hasMounted = React.useRef(false);
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-const { signInAnonymously } = useSession();
+  const { trySignInAnonymously } = useSession();
+
+  useEffect(() => {
+    trySignInAnonymously();
+  }, []);
 
   useIsomorphicLayoutEffect(() => {
     if (hasMounted.current) {
       return;
     }
-
-    signInAnonymously();
 
     if (Platform.OS === 'web') {
       // Adds the background color to the html element to prevent white background on overscroll.

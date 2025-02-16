@@ -20,7 +20,7 @@ import { useSession } from '~/lib/auth';
 
 
 export default function ProfileScreen() {
-  const {session} = useSession();
+  const {session, trySignInAnonymously} = useSession();
 
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
@@ -97,20 +97,6 @@ export default function ProfileScreen() {
     },
   ];
 
-  async function signInAnonymously() {
-    try {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        Alert.alert(error.message);
-      }
-      if (data) {
-        console.log(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="bg-card items-center pt-10 pb-5 px-5">
@@ -182,7 +168,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#6B7280" />
         </Pressable>
 
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </View>
       {session ? (
         <View>
@@ -193,7 +179,7 @@ export default function ProfileScreen() {
         <>
           <Text>Not signed in</Text>
           <Pressable
-            onPress={signInAnonymously}
+            onPress={trySignInAnonymously}
             className="flex-row items-center px-4 py-3 border-b border-border"
           >
             <Ionicons name="finger-print-outline" size={24} color="#111827" />

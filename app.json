@@ -34,9 +34,7 @@
       [
         "expo-build-properties",
         {
-          "android": {
-  
-          }
+          "android": {}
         }
       ]
     ],
@@ -50,6 +48,14 @@
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.laliaoperative.wayfarer"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2640f94f-9aab-4742-ab2c-879448370f65"
+      }
     }
   }
 }

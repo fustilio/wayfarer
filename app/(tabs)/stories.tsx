@@ -43,7 +43,7 @@ export default function StoriesScreen() {
             <View style={styles.authorRow}>
               <Avatar style={styles.authorImage} alt={''}>
                 <AvatarImage source={{ uri: `https://i.pravatar.cc/100?u=${story.id}` }} />
-                <AvatarFallback>YT</AvatarFallback>
+                <AvatarFallback><Text>YT</Text></AvatarFallback>
               </Avatar>
               <View style={styles.authorInfo}>
                 <Text className="font-bold" style={styles.authorName}>{story.author}</Text>

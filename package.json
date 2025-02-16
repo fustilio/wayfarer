@@ -1,16 +1,17 @@
 {
   "name": "wayfarer",
-  "main": "expo-router/entry",
   "version": "1.0.0",
   "private": true,
+  "main": "expo-router/entry",
   "scripts": {
-    "start": "cross-env EXPO_NO_TELEMETRY=1 expo start",
-    "prebuild": "cross-env expo prebuild --platform android --clean",
-    "dev": "cross-env EXPO_NO_TELEMETRY=1 expo run android --device",
-    "build:web": "expo export --platform web",
-    "lint": "expo lint",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "build:dev": "eas build --profile development --platform android",
+    "build:web": "expo export --platform web",
+    "dev": "cross-env EXPO_NO_TELEMETRY=1 expo run android --device",
+    "ios": "expo run:ios",
+    "lint": "expo lint",
+    "prebuild": "cross-env expo prebuild --platform android --clean",
+    "start": "cross-env EXPO_NO_TELEMETRY=1 expo start"
   },
   "dependencies": {
     "@babel/runtime": "^7.26.9",
@@ -45,6 +46,7 @@
     "expo-build-properties": "~0.13.2",
     "expo-camera": "~16.0.16",
     "expo-constants": "^17.0.5",
+    "expo-dev-client": "~5.0.12",
     "expo-file-system": "~18.0.10",
     "expo-font": "^13.0.3",
     "expo-haptics": "^14.0.1",
@@ -53,6 +55,7 @@
     "expo-linear-gradient": "^14.0.2",
     "expo-linking": "^7.0.5",
     "expo-location": "~18.0.6",
+    "expo-modules-autolinking": "*",
     "expo-navigation-bar": "~4.0.8",
     "expo-router": "4.0.17",
     "expo-secure-store": "~14.0.1",

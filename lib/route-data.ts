@@ -1,104 +1,55 @@
-import { getDistance as geolibGetDistance } from 'geolib';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Coordinate, LocalStorageData, PointOfInformation, Route } from './schemas';
+import { IMAGE } from '~/mocks';
+import { Route } from './schemas';
 
-const STORAGE_KEY = 'wayfarer_routes';
-
-const getRoute = async (routeId: string): Promise<Route | null> => {
-  try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    return data[routeId] || null;
-  } catch (e) {
-    console.error('Error loading route from AsyncStorage:', e);
-    return null;
-  }
-};
-
-const addPoi = async (
-  routeId: string,
-  newPointOfInformation: PointOfInformation,
-  route: Route
-): Promise<Route | null> => {
-  try {
-    const updatedRoute: Route = {
-      ...route,
-      pointsOfInformation: [...route.pointsOfInformation, newPointOfInformation],
-      coordinates: [...route.coordinates, { latitude: 0, longitude: 0 }], // TODO: add coordinate input
-    };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return updatedRoute;
-  } catch (e) {
-    console.error('Error saving route to AsyncStorage:', e);
-    return null;
-  }
-};
-
-const editPoi = async (
-  routeId: string,
-  index: number,
-  editedPointOfInformation: PointOfInformation,
-  route: Route
-): Promise<Route | null> => {
-  try {
-    const updatedRoute: Route = {
-      ...route,
-      pointsOfInformation: route.pointsOfInformation.map((pointOfInformation, i) => (i === index ? editedPointOfInformation : pointOfInformation)),
-    };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return updatedRoute;
-  } catch (e) {
-    console.error('Error saving route to AsyncStorage:', e);
-    return null;
-  }
-};
-
-const deletePoi = async (
-  routeId: string,
-  index: number,
-  route: Route
-): Promise<Route | null> => {
-  try {
-    const updatedRoute: Route = {
-      ...route,
-      pointsOfInformation: route.pointsOfInformation.filter((_, i) => i !== index),
-      coordinates: route.coordinates.filter((_, i) => i !== index),
-    };
-
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    data[routeId] = updatedRoute;
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return updatedRoute;
-  } catch (e) {
-    console.error('Error saving route to AsyncStorage:', e);
-    return null;
-  }
-};
-
-const loadRoute = async (routeId: string): Promise<Route | null> => {
-  try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-    return data[routeId] || null;
-  } catch (e) {
-    console.error('Error loading route from AsyncStorage:', e);
-    return null;
-  }
-};
-
-const getDistance = (start: Coordinate, end: Coordinate): number => {
-  return geolibGetDistance(start, end);
-};
-
-// TODO: refactor this to use the new schema ./lib/schemas.ts
-export type { Coordinate, Route, LocalStorageData, PointOfInformation };
-export { getRoute, loadRoute, addPoi, editPoi, deletePoi, getDistance };
+export const curatedRoutes: Route[] = [
+  {
+    id: '1',
+    title: 'Historical Kyoto',
+    description: "Explore Kyoto's most iconic temples and shrines.",
+    duration: 'Full-day',
+    image: IMAGE.KYOTO,
+    pointsOfInformation: [
+      {
+        name: 'Kinkaku-ji (Golden Pavilion)',
+        description: 'A Zen Buddhist temple covered in gold leaf.',
+        coordinates: { latitude: 34.9916, longitude: 135.7481 },
+      },
+      {
+        name: 'Fushimi Inari Shrine',
+        description: 'A Shinto shrine known for its thousands of torii gates.',
+        coordinates: { latitude: 34.967, longitude: 135.7684 },
+      },
+      {
+        name: 'Kiyomizu-dera Temple',
+        description:
+          'A historic temple with a wooden stage that offers panoramic views.',
+        coordinates: { latitude: 34.9851, longitude: 135.7856 },
+      },
+    ],
+  },
+  {
+    id: '2',
+    title: "Barcelona's Modernist Architecture",
+    description: 'Discover the architectural wonders of Antoni Gaudí.',
+    duration: 'Full-day',
+    image: IMAGE.BARCELONA,
+    pointsOfInformation: [
+      {
+        name: 'Sagrada Familia',
+        description: 'A large unfinished Roman Catholic minor basilica.',
+        coordinates: { latitude: 41.4036, longitude: 2.1744 },
+      },
+      {
+        name: 'Park Güell',
+        description:
+          'A public park system composed of gardens and architectural elements.',
+        coordinates: { latitude: 41.4145, longitude: 2.1527 },
+      },
+      {
+        name: 'Casa Batlló',
+        description: 'A renowned building designed by Antoni Gaudí.',
+        coordinates: { latitude: 41.3917, longitude: 2.1649 },
+      },
+    ],
+  },
+];

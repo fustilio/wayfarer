@@ -20,7 +20,6 @@ const RouteSchema = z.object({
   duration: z.string(),
   image: z.string(),
   pointsOfInformation: z.array(PointOfInformationSchema),
-  coordinates: z.array(CoordinateSchema),
   data: z.any().optional(),
 });
 

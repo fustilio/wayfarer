@@ -25,14 +25,13 @@ import {
   loadRoute,
   getDistance,
   PointOfInformation,
-} from '~/lib/route-data';
+  STORAGE_KEY,
+} from '~/lib/route-crud';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ButtonWithIcon } from '~/components/ui/button-with-icon';
 import { Pencil, Trash } from '~/lib/icons';
 import { useColorScheme } from '~/lib/useColorScheme';
-
-const STORAGE_KEY = 'wayfarer_routes';
 
 export default function RouteDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -51,9 +50,8 @@ export default function RouteDetailsScreen() {
 
   const loadRouteData = useCallback(async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-      setRoute(data[id as string] || null);
+      const data = await loadRoute(id as string);
+      setRoute(data || null);
     } catch (e) {
       console.error('Error loading route from AsyncStorage:', e);
     }
@@ -64,17 +62,17 @@ export default function RouteDetailsScreen() {
   }, [loadRouteData, id]);
 
   useEffect(() => {
-    if (route && route.coordinates.length > 1) {
+    if (route && route.pointsOfInformation.length > 1) {
       const calculatedDistances: number[] = [];
-      for (let i = 0; i < route.coordinates.length - 1; i++) {
+      for (let i = 0; i < route.pointsOfInformation.length - 1; i++) {
         const distance = getDistance(
           {
-            latitude: route.coordinates[i].latitude,
-            longitude: route.coordinates[i].longitude,
+            latitude: route.pointsOfInformation[i].coordinates.latitude,
+            longitude: route.pointsOfInformation[i].coordinates.longitude,
           },
           {
-            latitude: route.coordinates[i + 1].latitude,
-            longitude: route.coordinates[i + 1].longitude,
+            latitude: route.pointsOfInformation[i + 1].coordinates.latitude,
+            longitude: route.pointsOfInformation[i + 1].coordinates.longitude,
           }
         );
         calculatedDistances.push(distance);
@@ -88,7 +86,6 @@ export default function RouteDetailsScreen() {
   const handleMovePoiUp = async (index: number) => {
     if (route && index > 0) {
       const newPois = [...route.pointsOfInformation];
-      const newCoordinates = [...route.coordinates];
 
       // Swap POIs
       [newPois[index], newPois[index - 1]] = [
@@ -96,16 +93,9 @@ export default function RouteDetailsScreen() {
         newPois[index],
       ];
 
-      // Swap Coordinates
-      [newCoordinates[index], newCoordinates[index - 1]] = [
-        newCoordinates[index - 1],
-        newCoordinates[index],
-      ];
-
       const updatedRoute: Route = {
         ...route,
         pointsOfInformation: newPois,
-        coordinates: newCoordinates,
       };
 
       try {
@@ -123,7 +113,6 @@ export default function RouteDetailsScreen() {
   const handleMovePoiDown = async (index: number) => {
     if (route && index < route.pointsOfInformation.length - 1) {
       const newPois = [...route.pointsOfInformation];
-      const newCoordinates = [...route.coordinates];
 
       // Swap POIs
       [newPois[index], newPois[index + 1]] = [
@@ -131,16 +120,9 @@ export default function RouteDetailsScreen() {
         newPois[index],
       ];
 
-      // Swap Coordinates
-      [newCoordinates[index], newCoordinates[index + 1]] = [
-        newCoordinates[index + 1],
-        newCoordinates[index],
-      ];
-
       const updatedRoute: Route = {
         ...route,
         pointsOfInformation: newPois,
-        coordinates: newCoordinates,
       };
 
       try {
@@ -264,105 +246,106 @@ export default function RouteDetailsScreen() {
         <Text className="text-xl font-bold mt-2 mb-2">
           Points of Information:
         </Text>
-        {route.pointsOfInformation.map((pointOfInformation, index) => {
-          const distance = distances[index > 0 ? index - 1 : index];
-          return (
-            <Card
-              key={index}
-              className="flex-row items-center justify-between mb-2 rounded-md shadow-sm"
-            >
-              <View className="flex-row items-center flex-1">
-                {editingPoiId === String(index) ? (
-                  <Input
-                    className="flex-1 p-2 border border-gray-300 rounded-md"
-                    value={editedPoiText.name}
-                    onChangeText={(text) =>
-                      setEditedPoiText({ ...editedPoiText, name: text })
-                    }
-                    onBlur={() => handleSavePoi(index)}
-                  />
-                ) : (
-                  <Text className="flex-1">
-                    - {pointOfInformation.name}{' '}
-                    {index > 0 && distance !== undefined
-                      ? `(${distance}m)`
-                      : ''}
-                  </Text>
-                )}
-              </View>
-              <View className="flex-row">
-                <Pressable
-                  onPress={() => handleMovePoiUp(index)}
-                  disabled={index === 0}
-                  className="px-2"
-                >
-                  <Feather
-                    name="arrow-up"
-                    size={20}
-                    color={
-                      index === 0
-                        ? 'gray'
-                        : colorScheme === 'dark'
-                        ? 'white'
-                        : 'black'
-                    }
-                  />
-                </Pressable>
-                <Pressable
-                  onPress={() => handleMovePoiDown(index)}
-                  disabled={index === route.pointsOfInformation.length - 1}
-                  className="px-2"
-                >
-                  <Feather
-                    name="arrow-down"
-                    size={20}
-                    color={
-                      index === route.pointsOfInformation.length - 1
-                        ? 'gray'
-                        : colorScheme === 'dark'
-                        ? 'white'
-                        : 'black'
-                    }
-                  />
-                </Pressable>
-                {editingPoiId === String(index) ? (
-                  <View className="flex-row">
-                    <Button
-                      onPress={() => handleSavePoi(index)}
-                      className=" rounded-md px-3 py-1 ml-2"
-                    >
-                      <Text>Save</Text>
-                    </Button>
-                    <Button
-                      onPress={() => setEditingPoiId(null)}
-                      className=" rounded-md px-3 py-1 ml-2"
-                    >
-                      <Text>Cancel</Text>
-                    </Button>
-                  </View>
-                ) : (
-                  <View className="flex-row">
-                    <Button
-                      onPress={() =>
-                        handleEditPoi(String(index), pointOfInformation)
+        {route.pointsOfInformation &&
+          route.pointsOfInformation.map((pointOfInformation, index) => {
+            const distance = distances[index > 0 ? index - 1 : index];
+            return (
+              <Card
+                key={index}
+                className="flex-row items-center justify-between mb-2 rounded-md shadow-sm"
+              >
+                <View className="flex-row items-center flex-1">
+                  {editingPoiId === String(index) ? (
+                    <Input
+                      className="flex-1 p-2 border border-gray-300 rounded-md"
+                      value={editedPoiText.name}
+                      onChangeText={(text) =>
+                        setEditedPoiText({ ...editedPoiText, name: text })
                       }
-                      className="bg-blue-500 rounded-md px-3 py-1 ml-2"
-                    >
-                      <Pencil size={16} color="white" />
-                    </Button>
+                      onBlur={() => handleSavePoi(index)}
+                    />
+                  ) : (
+                    <Text className="flex-1">
+                      - {pointOfInformation.name}{' '}
+                      {index > 0 && distance !== undefined
+                        ? `(${distance}m)`
+                        : ''}
+                    </Text>
+                  )}
+                </View>
+                <View className="flex-row">
+                  <Pressable
+                    onPress={() => handleMovePoiUp(index)}
+                    disabled={index === 0}
+                    className="px-2"
+                  >
+                    <Feather
+                      name="arrow-up"
+                      size={20}
+                      color={
+                        index === 0
+                          ? 'gray'
+                          : colorScheme === 'dark'
+                          ? 'white'
+                          : 'black'
+                      }
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleMovePoiDown(index)}
+                    disabled={index === route.pointsOfInformation.length - 1}
+                    className="px-2"
+                  >
+                    <Feather
+                      name="arrow-down"
+                      size={20}
+                      color={
+                        index === route.pointsOfInformation.length - 1
+                          ? 'gray'
+                          : colorScheme === 'dark'
+                          ? 'white'
+                          : 'black'
+                      }
+                    />
+                  </Pressable>
+                  {editingPoiId === String(index) ? (
+                    <View className="flex-row">
+                      <Button
+                        onPress={() => handleSavePoi(index)}
+                        className=" rounded-md px-3 py-1 ml-2"
+                      >
+                        <Text>Save</Text>
+                      </Button>
+                      <Button
+                        onPress={() => setEditingPoiId(null)}
+                        className=" rounded-md px-3 py-1 ml-2"
+                      >
+                        <Text>Cancel</Text>
+                      </Button>
+                    </View>
+                  ) : (
+                    <View className="flex-row">
+                      <Button
+                        onPress={() =>
+                          handleEditPoi(String(index), pointOfInformation)
+                        }
+                        className="bg-blue-500 rounded-md px-3 py-1 ml-2"
+                      >
+                        <Pencil size={16} color="white" />
+                      </Button>
 
-                    <Button
-                      onPress={() => handleDeletePoi(index)}
-                      className="bg-red-500 rounded-md px-3 py-1 ml-2"
-                    >
-                      <Trash size={16} color="white" />
-                    </Button>
-                  </View>
-                )}
-              </View>
-            </Card>
-          );
-        })}
+                      <Button
+                        onPress={() => handleDeletePoi(index)}
+                        className="bg-red-500 rounded-md px-3 py-1 ml-2"
+                      >
+                        <Trash size={16} color="white" />
+                      </Button>
+                    </View>
+                  )}
+                </View>
+              </Card>
+            );
+          })}
 
         <View className="flex-row mt-4">
           <Input

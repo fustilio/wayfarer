@@ -1,22 +1,4 @@
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-interface Route {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  image: string;
-  pois: string[];
-  coordinates: Coordinate[];
-}
-
-interface LocalStorageData {
-  [routeId: string]: Route;
-}
-
+import { getDistance as geolibGetDistance } from 'geolib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Coordinate {
@@ -38,12 +20,28 @@ interface LocalStorageData {
   [routeId: string]: Route;
 }
 
+
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+
+interface Route {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  image: string;
+  pois: string[];
+  coordinates: Coordinate[];
+}
+
 const STORAGE_KEY = 'wayfarer_routes';
 
 const getRoute = async (routeId: string): Promise<Route | null> => {
   try {
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    const  data = jsonValue != null ? JSON.parse(jsonValue) : {};
     return data[routeId] || null;
   } catch (e) {
     console.error("Error loading route from AsyncStorage:", e);
@@ -60,7 +58,7 @@ const addPoi = async (routeId: string, newPoi: string, route: Route): Promise<Ro
     };
 
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    const  data = jsonValue != null ? JSON.parse(jsonValue) : {};
     data[routeId] = updatedRoute;
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return updatedRoute;
@@ -78,7 +76,7 @@ const editPoi = async (routeId: string, index: number, editedPoiText: string, ro
     };
 
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    const  data = jsonValue != null ? JSON.parse(jsonValue) : {};
     data[routeId] = updatedRoute;
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return updatedRoute;
@@ -97,7 +95,7 @@ const deletePoi = async (routeId: string, index: number, route: Route): Promise<
     };
 
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    const  data = jsonValue != null ? JSON.parse(jsonValue) : {};
     data[routeId] = updatedRoute;
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return updatedRoute;
@@ -111,7 +109,7 @@ const deletePoi = async (routeId: string, index: number, route: Route): Promise<
 const loadRoute = async (routeId: string): Promise<Route | null> => {
   try {
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    const  LocalStorageData = jsonValue != null ? JSON.parse(jsonValue) : {};
+    const  data = jsonValue != null ? JSON.parse(jsonValue) : {};
     return data[routeId] || null;
   } catch (e) {
     console.error("Error loading route from AsyncStorage:", e);
@@ -119,5 +117,9 @@ const loadRoute = async (routeId: string): Promise<Route | null> => {
   }
 };
 
+const getDistance = (start: Coordinate, end: Coordinate): number => {
+  return geolibGetDistance(start, end);
+};
+
 export type { Coordinate, Route, LocalStorageData };
-export { getRoute, addPoi, editPoi, deletePoi, loadRoute };
+export { getRoute, addPoi, editPoi, deletePoi, loadRoute, getDistance };

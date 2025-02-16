@@ -16,9 +16,9 @@ The development will be parallelized based on the core feature sets, as defined 
 1.  **Content Capture & Organization (Emily):**
     *   **Tasks:**
         *   Implement Panel Capture (Camera integration, OCR). (Not yet implemented)
-        *   Implement My Travel Notes (Data storage, UI). (Not yet implemented)
+        *   Implement My Travel Notes (Data storage, UI). (Basic CRUD, reordering, and distance calculation implemented)
         *   Implement data persistence and offline storage for My Travel Notes. (Not yet implemented)
-    *   **Dependencies:**  Camera library, OCR library, local storage solution. (Not yet implemented)
+    *   **Dependencies:**  Camera library, OCR library, local storage solution. (OCR and Camera still not implemented)
     *   **Team:**  Developer 1
 
 2.  **Authentic Cultural Immersion (Ben):**

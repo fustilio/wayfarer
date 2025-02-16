@@ -42,17 +42,12 @@ export default function CaptureScreen() {
 
 
   const takePicture = async () => {
-    console.log(cameraRef.current)
+    console.log("take picture")
     if (cameraRef.current) {
       const data = await cameraRef.current.takePictureAsync(null);
-      console.log('picture', data.uri);
       setCapturedImageUri(data.uri);
 
       try {
-        const text = await recognize(data.uri, {
-          lang: "eng",
-          tessPath: "tessdata",
-        });
         console.log("Recognized Text:", text);
         setRecognizedText(text);
         Alert.alert("Recognized Text", text);
@@ -73,7 +68,7 @@ export default function CaptureScreen() {
           Take photos of museum panels, landmarks, or anything interesting
         </Text>
       </View>
-      <CameraView style={styles.camera} ref={cameraRef} facing={facing}>
+      <CameraView className='bg-yellow-200 flex flex-1' ref={cameraRef} facing={facing} style={{borderRadius: 20, overflow: 'hidden', height: 500, marginBottom: 20}}>
         <View style={styles.buttonContainer}>
           <Pressable  onPress={toggleCameraFacing}>
             <Text >Flip Camera</Text>
@@ -134,6 +129,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     marginBottom: 20,
+    height: 500,
+    width: 500
   },
   buttonContainer: {
     flex: 1,

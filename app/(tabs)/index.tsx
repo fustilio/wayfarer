@@ -2,6 +2,7 @@ import { ScrollView, Image, View, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
+
 import { Text } from '~/components/ui/text';
 import {
   Card,

@@ -1,50 +1,6 @@
 import { getDistance as geolibGetDistance } from 'geolib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-interface Route {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  image: string;
-  pointsOfInformation: PointOfInformation[];
-  coordinates: Coordinate[];
-  data?: any;
-}
-
-interface PointOfInformation {
-  name: string;
-  description?: string;
-  coordinates: Coordinate;
-  imageUrl?: string;
-  rating?: number;
-}
-
-
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-interface Route {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  image: string;
-  pois: string[];
-  coordinates: Coordinate[];
-  data?: any;
-}
-
-interface LocalStorageData {
-  [routeId: string]: Route;
-}
+import { Coordinate, LocalStorageData, PointOfInformation, Route } from './schemas';
 
 const STORAGE_KEY = 'wayfarer_routes';
 
@@ -143,5 +99,6 @@ const getDistance = (start: Coordinate, end: Coordinate): number => {
   return geolibGetDistance(start, end);
 };
 
+// TODO: refactor this to use the new schema ./lib/schemas.ts
 export type { Coordinate, Route, LocalStorageData, PointOfInformation };
 export { getRoute, loadRoute, addPoi, editPoi, deletePoi, getDistance };

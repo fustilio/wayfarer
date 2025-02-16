@@ -87,7 +87,7 @@ export default function RouteDetailsScreen() {
 
   const handleMovePoiUp = async (index: number) => {
     if (route && index > 0) {
-      const newPois = [...route.pois];
+      const newPois = [...route.pointsOfInformation];
       const newCoordinates = [...route.coordinates];
 
       // Swap POIs
@@ -104,7 +104,7 @@ export default function RouteDetailsScreen() {
 
       const updatedRoute: Route = {
         ...route,
-        pois: newPois,
+        pointsOfInformation: newPois,
         coordinates: newCoordinates,
       };
 
@@ -121,8 +121,8 @@ export default function RouteDetailsScreen() {
   };
 
   const handleMovePoiDown = async (index: number) => {
-    if (route && index < route.pois.length - 1) {
-      const newPois = [...route.pois];
+    if (route && index < route.pointsOfInformation.length - 1) {
+      const newPois = [...route.pointsOfInformation];
       const newCoordinates = [...route.coordinates];
 
       // Swap POIs
@@ -139,7 +139,7 @@ export default function RouteDetailsScreen() {
 
       const updatedRoute: Route = {
         ...route,
-        pois: newPois,
+        pointsOfInformation: newPois,
         coordinates: newCoordinates,
       };
 

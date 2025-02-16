@@ -38,7 +38,7 @@ To achieve our purpose, Wayfarer is built upon the following key principles:
 Wayfarer is a mobile application built with Expo (MVP focused initially on iOS and Android) featuring the following core functionalities designed to deliver on our WHY and HOW:
 
 * **For Emily, the Detail-Oriented Explorer:**
-    * **Panel Capture & My Travel Notes:**  Effortlessly capture information from museum and site panels using the device camera, including text extraction (OCR) and image capture, and create/organize notes.
+    * **Panel Capture & My Travel Notes:**  Effortlessly capture information from museum and site panels using the device camera, including text extraction (OCR) and image capture, and create/organize notes. (Not yet implemented)
 
 * **For Ben, the Off-the-Beaten-Path Seeker:**
     * **Hidden Gems:**  Curated lists of less-known attractions and authentic experiences for select destinations, including descriptions, photos, and map locations.

@@ -7,27 +7,7 @@ import { Text } from '~/components/ui/text';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-
-// Define the interfaces (Coordinate, Route, LocalStorageData) as above
-
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-interface Route {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  image: string;
-  pois: string[];
-  coordinates: Coordinate[];
-}
-
-interface LocalStorageData {
-  [routeId: string]: Route;
-}
+import { LocalStorageData, Route, getRoute, addPoi, editPoi, deletePoi } from '~/lib/route-data';
 
 const STORAGE_KEY = 'wayfarer_routes';
 
@@ -111,21 +91,12 @@ export default function RouteDetailsScreen() {
 
   const handleAddPoi = async () => {
     if (newPoi && route) {
-      const updatedRoute: Route = {
-        ...route,
-        pois: [...route.pois, newPoi],
-        coordinates: [...route.coordinates, { latitude: 0, longitude: 0 }], // TODO: add coordinate input
-      };
-
-      try {
-        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-        data[id as string] = updatedRoute;
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const updatedRoute = await addPoi(id as string, newPoi, route);
+      if (updatedRoute) {
         setRoute(updatedRoute);
         setNewPoi('');
-      } catch (e) {
-        console.error('Error saving route to AsyncStorage:', e);
+      } else {
+        Alert.alert('Error adding POI');
       }
     }
   };
@@ -137,21 +108,13 @@ export default function RouteDetailsScreen() {
 
   const handleSavePoi = async (index: number) => {
     if (route) {
-      const updatedRoute: Route = {
-        ...route,
-        pois: route.pois.map((poi, i) => (i === index ? editedPoiText : poi)),
-      };
-
-      try {
-        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-        data[id as string] = updatedRoute;
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const updatedRoute = await editPoi(id as string, index, editedPoiText, route);
+      if (updatedRoute) {
         setRoute(updatedRoute);
         setEditingPoiId(null);
         setEditedPoiText('');
-      } catch (e) {
-        console.error('Error saving route to AsyncStorage:', e);
+      } else {
+        Alert.alert('Error saving POI');
       }
     }
   };
@@ -166,20 +129,11 @@ export default function RouteDetailsScreen() {
           text: 'OK',
           onPress: async () => {
             if (route) {
-              const updatedRoute: Route = {
-                ...route,
-                pois: route.pois.filter((_, i) => i !== index),
-                coordinates: route.coordinates.filter((_, i) => i !== index),
-              };
-
-              try {
-                const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-                const data = jsonValue != null ? JSON.parse(jsonValue) : {};
-                data[id as string] = updatedRoute;
-                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+              const updatedRoute = await deletePoi(id as string, index, route);
+              if (updatedRoute) {
                 setRoute(updatedRoute);
-              } catch (e) {
-                console.error('Error saving route to AsyncStorage:', e);
+              } else {
+                Alert.alert('Error deleting POI');
               }
             }
           },

@@ -24,6 +24,7 @@ import {
   Coordinate,
   loadRoute,
   getDistance,
+  PointOfInformation,
 } from '~/lib/route-data';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -36,12 +37,18 @@ const STORAGE_KEY = 'wayfarer_routes';
 export default function RouteDetailsScreen() {
   const { id } = useLocalSearchParams();
   const { colorScheme } = useColorScheme();
-  const [newPoi, setNewPoi] = useState('');
+  const [newPoi, setNewPoi] = useState<PointOfInformation>({
+    name: '',
+    coordinates: { latitude: 0, longitude: 0 },
+  });
   const [editingPoiId, setEditingPoiId] = useState<string | null>(null);
-  const [editedPoiText, setEditedPoiText] = useState('');
+  const [editedPoiText, setEditedPoiText] = useState<PointOfInformation>({
+    name: '',
+    coordinates: { latitude: 0, longitude: 0 },
+  });
   const [route, setRoute] = useState<Route | null>(null);
   const [distances, setDistances] = useState<number[]>([]);
-                                                                                                                          
+
   const loadRouteData = useCallback(async () => {
     try {
       const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
@@ -51,18 +58,24 @@ export default function RouteDetailsScreen() {
       console.error('Error loading route from AsyncStorage:', e);
     }
   }, [id]);
-                                                                                                                          
+
   useEffect(() => {
     loadRouteData();
   }, [loadRouteData, id]);
-                                                                                                                          
+
   useEffect(() => {
     if (route && route.coordinates.length > 1) {
       const calculatedDistances: number[] = [];
       for (let i = 0; i < route.coordinates.length - 1; i++) {
         const distance = getDistance(
-          { latitude: route.coordinates[i].latitude, longitude: route.coordinates[i].longitude },
-          { latitude: route.coordinates[i + 1].latitude, longitude: route.coordinates[i + 1].longitude },
+          {
+            latitude: route.coordinates[i].latitude,
+            longitude: route.coordinates[i].longitude,
+          },
+          {
+            latitude: route.coordinates[i + 1].latitude,
+            longitude: route.coordinates[i + 1].longitude,
+          }
         );
         calculatedDistances.push(distance);
       }
@@ -71,24 +84,24 @@ export default function RouteDetailsScreen() {
       setDistances([]);
     }
   }, [route]);
-                                                                                                                          
+
   const handleMovePoiUp = async (index: number) => {
     if (route && index > 0) {
       const newPois = [...route.pois];
       const newCoordinates = [...route.coordinates];
-                                                                                                                          
+
       // Swap POIs
       [newPois[index], newPois[index - 1]] = [
         newPois[index - 1],
         newPois[index],
       ];
-                                                                                                                          
+
       // Swap Coordinates
       [newCoordinates[index], newCoordinates[index - 1]] = [
         newCoordinates[index - 1],
         newCoordinates[index],
       ];
-                                                                                                                          
+
       const updatedRoute: Route = {
         ...route,
         pois: newPois,
@@ -111,13 +124,13 @@ export default function RouteDetailsScreen() {
     if (route && index < route.pois.length - 1) {
       const newPois = [...route.pois];
       const newCoordinates = [...route.coordinates];
-                                                                                                                          
+
       // Swap POIs
       [newPois[index], newPois[index + 1]] = [
         newPois[index + 1],
         newPois[index],
       ];
-                                                                                                                          
+
       // Swap Coordinates
       [newCoordinates[index], newCoordinates[index + 1]] = [
         newCoordinates[index + 1],
@@ -129,7 +142,7 @@ export default function RouteDetailsScreen() {
         pois: newPois,
         coordinates: newCoordinates,
       };
-                                                                                                                          
+
       try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
         const data = jsonValue != null ? JSON.parse(jsonValue) : {};
@@ -141,22 +154,25 @@ export default function RouteDetailsScreen() {
       }
     }
   };
-                                                                                                                          
+
   const handleAddPoi = async () => {
-    if (newPoi && route) {
+    if (newPoi.name && route) {
       const updatedRoute = await addPoi(id as string, newPoi, route);
       if (updatedRoute) {
         setRoute(updatedRoute);
-        setNewPoi('');
+        setNewPoi({ name: '', coordinates: { latitude: 0, longitude: 0 } });
       } else {
-        Alert.alert('Error adding POI');
+        Alert.alert('Error adding Point of Information');
       }
     }
   };
-                                                                                                                          
-  const handleEditPoi = (poiId: string, poiText: string) => {
+
+  const handleEditPoi = (
+    poiId: string,
+    pointOfInformation: PointOfInformation
+  ) => {
     setEditingPoiId(poiId);
-    setEditedPoiText(poiText);
+    setEditedPoiText(pointOfInformation);
   };
 
   const handleSavePoi = async (index: number) => {
@@ -170,13 +186,16 @@ export default function RouteDetailsScreen() {
       if (updatedRoute) {
         setRoute(updatedRoute);
         setEditingPoiId(null);
-        setEditedPoiText('');
+        setEditedPoiText({
+          name: '',
+          coordinates: { latitude: 0, longitude: 0 },
+        });
       } else {
         Alert.alert('Error saving POI');
       }
     }
   };
-                                                                                                                          
+
   const handleDeletePoi = async (index: number) => {
     Alert.alert(
       'Delete POI',
@@ -199,7 +218,7 @@ export default function RouteDetailsScreen() {
       ]
     );
   };
-                                                                                                                          
+
   if (!route) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -207,7 +226,7 @@ export default function RouteDetailsScreen() {
       </View>
     );
   }
-                                                                                                                          
+
   return (
     <ScrollView className="flex-1">
       <Image source={{ uri: route.image }} className="w-full h-80 mb-4" />
@@ -241,9 +260,11 @@ export default function RouteDetailsScreen() {
               />
             ))}
           </MapView> */}
-                                                                                                                          
-        <Text className="text-xl font-bold mt-2 mb-2">Points of Interest:</Text>
-        {route.pois.map((poi, index) => {
+
+        <Text className="text-xl font-bold mt-2 mb-2">
+          Points of Information:
+        </Text>
+        {route.pointsOfInformation.map((pointOfInformation, index) => {
           const distance = distances[index > 0 ? index - 1 : index];
           return (
             <Card
@@ -254,13 +275,18 @@ export default function RouteDetailsScreen() {
                 {editingPoiId === String(index) ? (
                   <Input
                     className="flex-1 p-2 border border-gray-300 rounded-md"
-                    value={editedPoiText}
-                    onChangeText={setEditedPoiText}
+                    value={editedPoiText.name}
+                    onChangeText={(text) =>
+                      setEditedPoiText({ ...editedPoiText, name: text })
+                    }
                     onBlur={() => handleSavePoi(index)}
                   />
                 ) : (
                   <Text className="flex-1">
-                    - {poi} {index > 0 && distance !== undefined ? `(${distance}m)` : ''}
+                    - {pointOfInformation.name}{' '}
+                    {index > 0 && distance !== undefined
+                      ? `(${distance}m)`
+                      : ''}
                   </Text>
                 )}
               </View>
@@ -284,14 +310,14 @@ export default function RouteDetailsScreen() {
                 </Pressable>
                 <Pressable
                   onPress={() => handleMovePoiDown(index)}
-                  disabled={index === route.pois.length - 1}
+                  disabled={index === route.pointsOfInformation.length - 1}
                   className="px-2"
                 >
                   <Feather
                     name="arrow-down"
                     size={20}
                     color={
-                      index === route.pois.length - 1
+                      index === route.pointsOfInformation.length - 1
                         ? 'gray'
                         : colorScheme === 'dark'
                         ? 'white'
@@ -316,35 +342,40 @@ export default function RouteDetailsScreen() {
                   </View>
                 ) : (
                   <View className="flex-row">
-                    <ButtonWithIcon
-                      onPress={() => handleEditPoi(String(index), poi)}
+                    <Button
+                      onPress={() =>
+                        handleEditPoi(String(index), pointOfInformation)
+                      }
                       className="bg-blue-500 rounded-md px-3 py-1 ml-2"
-                      icon={<Pencil size={16} color="white" />}
-                    />
-                    <ButtonWithIcon
+                    >
+                      <Pencil size={16} color="white" />
+                    </Button>
+
+                    <Button
                       onPress={() => handleDeletePoi(index)}
                       className="bg-red-500 rounded-md px-3 py-1 ml-2"
-                      icon={<Trash size={16} color="white" />}
-                    />
+                    >
+                      <Trash size={16} color="white" />
+                    </Button>
                   </View>
                 )}
               </View>
             </Card>
           );
         })}
-                                                                                                                          
+
         <View className="flex-row mt-4">
           <Input
             className="flex-1 p-2 border border-gray-300 rounded-md mr-2"
-            placeholder="Add a new point of interest"
-            value={newPoi}
-            onChangeText={setNewPoi}
+            placeholder="Add a new point of information"
+            value={newPoi.name}
+            onChangeText={(text) => setNewPoi({ ...newPoi, name: text })}
           />
           <Button
             onPress={handleAddPoi}
             className="bg-green-500  rounded-md px-4 py-2"
           >
-            <Text>Add POI</Text>
+            <Text>Add Point of Information</Text>
           </Button>
         </View>
       </View>

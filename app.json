@@ -51,16 +51,18 @@
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
-      "package": "com.laliaoperative.wayfarer"
+      "package": "com.fustilio.wayfarer"
     },
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "2640f94f-9aab-4742-ab2c-879448370f65"
+        "projectId": "3f887fa4-93af-4808-bb8e-1f8499b9659c"
       }
     }
   }
